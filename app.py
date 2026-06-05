@@ -1,21 +1,35 @@
 import os 
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
-
+from werkzeug.security import generate_password_hash, check_password_hash
+from config import config
+from openai import OpenAI
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave_secreta_local')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///vfd_course.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config.from_object(config[os.environ.get('FLASK_ENV', 'development')])
 
 db = SQLAlchemy(app)
 
 class User(db.Model):
+    """Modelo de Usuario con autenticación segura"""
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    whatsapp = db.Column(db.String(20), nullable=True)
     is_verified = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    
+    def set_password(self, password):
+        """Hash la contraseña antes de guardar"""
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        """Verifica si la contraseña es correcta"""
+        return check_password_hash(self.password_hash, password)
+    
+    def __repr__(self):
+        return f'<User {self.email}>'
 
 with app.app_context():
     db.create_all()
@@ -163,12 +177,68 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        flash('Registro exitoso. (Validación de email pendiente de configurar)', 'success')
-        return redirect(url_for('index'))
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        whatsapp = request.form.get('whatsapp', '').strip()
+        
+        # Validación
+        if not all([name, email, password, whatsapp]):
+            flash('Todos los campos son obligatorios.', 'error')
+            return redirect(url_for('register'))
+        
+        if len(password) < 6:
+            flash('La contraseña debe tener al menos 6 caracteres.', 'error')
+            return redirect(url_for('register'))
+        
+        # Verificar si el usuario ya existe
+        if User.query.filter_by(email=email).first():
+            flash('Este email ya está registrado.', 'error')
+            return redirect(url_for('register'))
+        
+        # Crear nuevo usuario
+        try:
+            new_user = User(name=name, email=email, whatsapp=whatsapp)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            flash('¡Registro exitoso! Por favor inicia sesión.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Error al registrar. Intenta de nuevo.', 'error')
+            return redirect(url_for('register'))
+    
     return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        if not email or not password:
+            flash('Email y contraseña son obligatorios.', 'error')
+            return redirect(url_for('login'))
+        
+        user = User.query.filter_by(email=email).first()
+        
+        if user and user.check_password(password):
+            session['user_id'] = user.id
+            session['user_name'] = user.name
+            flash(f'¡Bienvenido, {user.name}!', 'success')
+            return redirect(url_for('course_dashboard'))
+        else:
+            flash('Email o contraseña incorrectos.', 'error')
+            return redirect(url_for('login'))
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('Sesión cerrada.', 'success')
+    return redirect(url_for('index'))
 
 @app.route('/modulo/<int:modulo_id>')
 def modulo(modulo_id):
@@ -189,7 +259,86 @@ def modulo(modulo_id):
 
 @app.route('/dashboard')
 def course_dashboard():
+    if 'user_id' not in session:
+        flash('Debes iniciar sesión primero.', 'error')
+        return redirect(url_for('login'))
     return redirect(url_for('modulo', modulo_id=1))
+
+# ============ CHATBOT CON IA ============
+
+# Cliente OpenAI se inicializará en la función chatbot cuando se necesite
+client = None
+
+SYSTEM_PROMPT = """Eres un asistente técnico experto en electricidad, electrónica, física, matemática y especialmente en Variadores de Frecuencia (VFD), arrancadores suave, bombas y bombeo con paneles solares.
+
+TEMAS PERMITIDOS:
+- Variadores de Frecuencia (VFD) - CFW500, WEG, funcionamiento, programación
+- Control de motores eléctricos
+- Bombeo solar con paneles fotovoltaicos
+- Sistemas de presión constante
+- Arrancadores suave (Soft Start)
+- Bombas centrífugas, sumergibles, etc.
+- Electricidad (voltaje, corriente, potencia, factor de potencia)
+- Electrónica (componentes, circuitos, transistores, tiristores)
+- Física (fuerzas, trabajo, energía, rendimiento)
+- Matemática aplicada a estas áreas
+
+RESTRICCIONES:
+- Solo responde preguntas relacionadas con los temas listados
+- Si la pregunta NO está relacionada, di amablemente: "Disculpa, solo puedo ayudarte con temas de VFD, electricidad, electrónica, física, matemática y bombeo. ¿Tienes alguna pregunta sobre estos temas?"
+- Respuestas claras, concisas y técnicas
+- Usa ejemplos prácticos cuando sea posible
+- Sugiere consultar módulos del curso cuando sea relevante
+
+ESTILO:
+- Profesional pero amigable
+- Técnico pero accesible
+- Máximo 3-4 párrafos por respuesta
+- Incluye fórmulas cuando sea necesario
+"""
+
+@app.route('/api/chatbot', methods=['POST'])
+def chatbot():
+    """Endpoint para comunicación con el chatbot IA"""
+    try:
+        data = request.get_json()
+        user_message = data.get('message', '').strip()
+        
+        if not user_message:
+            return jsonify({'error': 'Mensaje vacío'}), 400
+        
+        api_key = app.config.get('OPENAI_API_KEY', '').strip()
+        if not api_key:
+            return jsonify({'error': 'API Key de OpenAI no configurada. Crea un archivo .env con OPENAI_API_KEY.'}), 500
+        
+        # Inicializar cliente OpenAI
+        try:
+            openai_client = OpenAI(api_key=api_key)
+        except Exception as e:
+            return jsonify({'error': f'Error al inicializar OpenAI: {str(e)}'}), 500
+        
+        # Llamar a OpenAI API
+        response = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_message}
+            ],
+            max_tokens=500,
+            temperature=0.7
+        )
+        
+        bot_message = response.choices[0].message.content
+        
+        return jsonify({
+            'success': True,
+            'message': bot_message
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'error': f'Error en el chatbot: {str(e)}'
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
