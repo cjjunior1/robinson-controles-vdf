@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}{{ modulo.titulo }} - Robinson Controles VDF{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="module-content">
+                <span class="badge bg-primary mb-3 px-3 py-2">Módulo {{ modulo.id }}</span>
+                <h2 class="fw-bold mb-4" style="color: var(--primary-dark);">{{ modulo.titulo }}</h2>
+                <img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=1000&q=80" class="img-fluid rounded mb-4 w-100" alt="{{ modulo.titulo }}" style="max-height: 400px; object-fit: cover;">
+                
+                <h4 class="fw-bold mt-4 mb-3" style="color: var(--primary-blue);"> Descripción del Módulo:</h4>
+                <p class="lead">{{ modulo.descripcion }}</p>
+                
+                <h4 class="fw-bold mt-4 mb-3" style="color: var(--primary-blue);">🎯 Objetivos de esta lección:</h4>
+                <ul class="list-unstyled">
+                    {% for obj in modulo.objetivos %}
+                        <li class="mb-2 fs-5">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            {{ obj }}
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <div class="alert alert-info mt-4">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Nota práctica:</strong> Antes de modificar parámetros, asegúrate de que el VFD esté en modo "STOP" y la referencia de frecuencia sea 0 Hz por seguridad.
+                </div>
+
+                <div class="mt-5 d-flex justify-content-between align-items-center">
+                    {% if modulo_anterior %}
+                        <a href="/modulo/{{ modulo_anterior }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left"></i> Anterior
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary btn-lg" disabled>
+                            <i class="bi bi-arrow-left"></i> Anterior
+                        </button>
+                    {% endif %}
+                    
+                    <span class="badge bg-success fs-6 px-3 py-2">Progreso: {{ progreso }}%</span>
+                    
+                    {% if modulo_siguiente %}
+                        <a href="/modulo/{{ modulo_siguiente }}" class="btn btn-comenzar btn-lg">
+                            Siguiente <i class="bi bi-arrow-right"></i>
+                        </a>
+                    {% else %}
+                        <a href="/" class="btn btn-comenzar btn-lg">
+                            <i class="bi bi-house"></i> Volver al Inicio
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

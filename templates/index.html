@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Inicio - Robinson Controles VDF{% endblock %}
+
+{% block content %}
+<section class="hero-section text-center py-5">
+    <div class="container">
+        <h1 class="electric-title display-3 fw-bold mb-4">Domina la Programación de Variadores de Frecuencia</h1>
+        <p class="lead text-white mb-5 fs-4">Especialización completa en WEG CFW500. Desde los fundamentos hasta el control vectorial.</p>
+        <a href="/register" class="btn btn-lg btn-comenzar px-5 py-3 fw-bold">Comenzar Ahora <i class="bi bi-arrow-right ms-2"></i></a>
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold" style="color: #1e3a5f;">12 Módulos Profesionales</h2>
+            <p class="text-muted fs-5">De los fundamentos a las aplicaciones avanzadas.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm module-card">
+                    <img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Fundamentos">
+                    <div class="card-body">
+                        <span class="badge bg-primary mb-2">Módulos 1 - 4</span>
+                        <h5 class="card-title fw-bold">Fundamentos y Principios</h5>
+                        <p class="card-text text-muted">Introducción, funciones, principios de funcionamiento y diferencias con Soft Start.</p>
+                        <a href="/modulo/1" class="btn btn-outline-primary w-100">Ver Contenido</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm module-card">
+                    <img src="https://images.unsplash.com/photo-1555664424-778a69022365?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Programación">
+                    <div class="card-body">
+                        <span class="badge bg-success mb-2">Módulos 5 - 8</span>
+                        <h5 class="card-title fw-bold">Programación y Aplicaciones</h5>
+                        <p class="card-text text-muted">Programación básica CFW500, bombeo solar, presión constante y aplicaciones típicas.</p>
+                        <a href="/modulo/5" class="btn btn-outline-success w-100">Ver Contenido</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm module-card">
+                    <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Avanzado">
+                    <div class="card-body">
+                        <span class="badge bg-warning text-dark mb-2">Módulos 9 - 12</span>
+                        <h5 class="card-title fw-bold">Avanzado y Comunicaciones</h5>
+                        <p class="card-text text-muted">Resistencias de frenado, comunicaciones Modbus, control vectorial y ventajas operativas.</p>
+                        <a href="/modulo/9" class="btn btn-outline-warning w-100">Ver Contenido</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Chatbot -->
+<div class="chatbot-container">
+    <button class="chatbot-toggle" id="chatbotToggle"><i class="bi bi-chat-dots-fill"></i></button>
+    <div class="chatbot-window" id="chatbotWindow">
+        <div class="chatbot-header">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-robot fs-4 me-2"></i>
+                <div><h6 class="mb-0 fw-bold text-white">Asistente Técnico VDF</h6></div>
+            </div>
+            <button class="btn-close btn-close-white" id="chatbotClose"></button>
+        </div>
+        <div class="chatbot-body" id="chatbotBody">
+            <div class="bot-message" id="botGreeting"></div>
+        </div>
+        <div class="chatbot-input-area">
+            <input type="text" id="chatInput" class="form-control" placeholder="Escribe tu duda técnica...">
+            <button id="sendBtn" class="btn btn-primary ms-2"><i class="bi bi-send-fill"></i></button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const saludos = [
+        { texto: "¡Hola! 👋 Soy tu asistente técnico especializado.", color: "#01F78A" },
+        { texto: "¡Bienvenido!  Estoy aquí para resolver tus dudas.", color: "#FF6B35" },
+        { texto: "¡Saludos! ⚡ Tu experto en VFD al servicio.", color: "#0194F2" },
+        { texto: "¡Hey! 🔧 Soy tu compañero de aprendizaje técnico.", color: "#8E3EBD" }
+    ];
+    const capacidades = [
+        "Domino: Variadores de Frecuencia, Electrónica de Potencia y Control Vectorial ⚡",
+        "Experto en: WEG CFW500, Bombas Solares y Sistemas de Presión Constante 🔧",
+        "Especialista en: Automatización Industrial, PLCs y Comunicaciones Modbus 🤖",
+        "Capacitado en: Física Eléctrica, Matemáticas Aplicadas y Termodinámica "
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const s = saludos[Math.floor(Math.random() * saludos.length)];
+        const c = capacidades[Math.floor(Math.random() * capacidades.length)];
+        document.getElementById('botGreeting').innerHTML = `
+            <p style="color: ${s.color}; font-weight: bold; margin-bottom: 5px;">${s.texto}</p>
+            <p style="color: #0194F2; font-style: italic; margin-bottom: 0;">${c}</p>
+            <small class="text-muted mt-2 d-block">Solo respondo temas de eléctrica, electrónica, VFD, matemáticas y física.</small>
+        `;
+
+        const toggle = document.getElementById('chatbotToggle');
+        const win = document.getElementById('chatbotWindow');
+        const close = document.getElementById('chatbotClose');
+        const send = document.getElementById('sendBtn');
+        const input = document.getElementById('chatInput');
+        const body = document.getElementById('chatbotBody');
+
+        toggle.onclick = () => win.classList.toggle('active');
+        close.onclick = () => win.classList.remove('active');
+
+        function sendMsg() {
+            const msg = input.value.trim();
+            if (!msg) return;
+            body.innerHTML += `<div class="user-message">${msg}</div>`;
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            })
+            .then(res => res.json())
+            .then(data => {
+                body.innerHTML += `<div class="bot-message">${data.response}</div>`;
+                body.scrollTop = body.scrollHeight;
+            })
+            .catch(() => body.innerHTML += `<div class="bot-message">Error de conexión.</div>`);
+        }
+        send.onclick = sendMsg;
+        input.onkeypress = (e) => { if (e.key === 'Enter') sendMsg(); };
+    });
+</script>
+{% endblock %}

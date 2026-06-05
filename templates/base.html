@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Robinson Controles VDF{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand logo-text fw-bold" href="/">
+                <i class="bi bi-cpu-fill me-2"></i>Robinson Controles VDF
+            </a>
+            <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-nav-inicio" href="/">
+                            <i class="bi bi-house-fill me-1"></i>Inicio
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item dropdown nav-dropdown ms-2">
+                        <a class="btn btn-nav-curso dropdown-toggle" href="#" role="button">
+                            <i class="bi bi-book-fill me-1"></i>Mi Curso
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg">
+                            <li><a class="dropdown-item" href="/modulo/1">1. Introducción a los VFD</a></li>
+                            <li><a class="dropdown-item" href="/modulo/2">2. Función de un VFD</a></li>
+                            <li><a class="dropdown-item" href="/modulo/3">3. Principios de Funcionamiento</a></li>
+                            <li><a class="dropdown-item" href="/modulo/4">4. Diferencia VFD y Soft Start</a></li>
+                            <li><a class="dropdown-item" href="/modulo/5">5. Aplicaciones de VFD</a></li>
+                            <li><a class="dropdown-item" href="/modulo/6">6. Programación Básica (CFW500)</a></li>
+                            <li><a class="dropdown-item" href="/modulo/7">7. Bombeo Solar con VFD</a></li>
+                            <li><a class="dropdown-item" href="/modulo/8">8. Sistema de Presión Constante</a></li>
+                            <li><a class="dropdown-item" href="/modulo/9">9. Resistencia de Frenado</a></li>
+                            <li><a class="dropdown-item" href="/modulo/10">10. Control por Comunicación</a></li>
+                            <li><a class="dropdown-item" href="/modulo/11">11. Control Vectorial</a></li>
+                            <li><a class="dropdown-item" href="/modulo/12">12. Ventajas del uso de VFD</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item ms-2"><a class="btn btn-login-custom" href="/login">Iniciar Sesión</a></li>
+                    <li class="nav-item ms-2"><a class="btn btn-register-custom" href="/register">Inscribirse</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main>{% block content %}{% endblock %}</main>
+
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <div class="container"><p class="mb-0">&copy; 2026 Robinson Controles VDF. Especialización en WEG CFW500.</p></div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

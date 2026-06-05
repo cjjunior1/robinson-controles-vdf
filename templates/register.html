@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Inscripción - Robinson Controles VDF{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5">
+                    <h3 class="text-center fw-bold mb-4" style="color: #1e3a5f;">Crea tu cuenta</h3>
+                    <p class="text-center text-muted mb-4">El sistema generará automáticamente tu ID y contraseña.</p>
+                    
+                    <form method="POST" action="/register">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre Completo</label>
+                            <input type="text" name="name" class="form-control form-control-lg" placeholder="Ej. Robinson Rosario" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Correo Electrónico</label>
+                            <input type="email" name="email" class="form-control form-control-lg" placeholder="tucorreo@ejemplo.com" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Número de WhatsApp</label>
+                            <div class="input-group">
+                                <input type="text" name="whatsapp" class="form-control form-control-lg" placeholder="+1 809 000 0000" required>
+                                <button type="button" class="btn btn-success" style="background-color: #25D366; border: none;" 
+                                   onclick="alert('Este numero debe tener WhatsApp o no se efectuara la suscripcion')">
+                                    <i class="bi bi-whatsapp fs-5"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">Usado para verificación y soporte.</small>
+                        </div>
+                        <button type="submit" class="btn w-100 btn-lg" style="background-color: #8E3EBD; color: #fff; font-weight: bold;">Inscribirse</button>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <small>¿Ya tienes cuenta? <a href="/login" class="text-decoration-none fw-bold" style="color: #01F78A;">Inicia sesión aquí</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
