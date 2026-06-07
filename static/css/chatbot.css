@@ -333,7 +333,7 @@ html.vfd-dark .card-img-top { filter: brightness(0.85); }
 /* ---------- Toggle Claro / Oscuro de la pagina (a la derecha) ---------- */
 #vfd-theme-toggle {
     position: fixed;
-    top: 12px;
+    top: 8px;
     right: 20px;
     z-index: 9999;
     width: 44px; height: 44px;
