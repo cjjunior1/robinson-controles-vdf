@@ -16,15 +16,36 @@
     --vfd-muted: #9fb0cc;
 }
 
-/* Dark mode de la PAGINA (toggle claro/oscuro) */
+/* ===== Dark mode GLOBAL de la PAGINA (toggle claro/oscuro) ===== */
 html.vfd-dark body { background-color: #0d1422 !important; color: #e8eefc; }
-html.vfd-dark .module-content,
-html.vfd-dark .sidebar-menu,
+
+/* Superficies / secciones de todo el sitio */
+html.vfd-dark section,
+html.vfd-dark .bg-light,
+html.vfd-dark .bg-white,
 html.vfd-dark .card,
-html.vfd-dark .bg-white { background-color: #121a2b !important; color: #e8eefc; }
-html.vfd-dark .module-content p,
-html.vfd-dark .module-content li,
-html.vfd-dark .card-text { color: #c9d4ea; }
+html.vfd-dark .module-content,
+html.vfd-dark .sidebar-menu { background-color: #121a2b !important; color: #e8eefc; }
+
+/* La hamburguesa NO debe oscurecerse: se mantiene clara y visible */
+html.vfd-dark .navbar-toggler.bg-light { background-color: #f8f9fa !important; }
+
+/* Hero oscurecido */
+html.vfd-dark .hero-section {
+    background: linear-gradient(rgba(8, 12, 22, 0.92), rgba(8, 12, 22, 0.85)),
+                url('https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+}
+
+/* Texto legible en cualquier página (incluye estilos inline azules) */
+html.vfd-dark h1, html.vfd-dark h2, html.vfd-dark h3,
+html.vfd-dark h4, html.vfd-dark h5, html.vfd-dark h6 { color: #e8eefc !important; }
+html.vfd-dark p, html.vfd-dark li, html.vfd-dark small,
+html.vfd-dark .card-text, html.vfd-dark .text-muted { color: #c9d4ea !important; }
+
+/* Imágenes un poco más suaves en oscuro */
+html.vfd-dark .card-img-top { filter: brightness(0.85); }
 
 /* ---------- Contenedor / Boton flotante (FIJO) ---------- */
 #vfd-chatbot-container {
@@ -312,22 +333,53 @@ html.vfd-dark .card-text { color: #c9d4ea; }
 /* ---------- Toggle Claro / Oscuro de la pagina (a la derecha) ---------- */
 #vfd-theme-toggle {
     position: fixed;
-    top: 90px;
+    top: 70px;
     right: 20px;
     z-index: 9999;
     width: 44px; height: 44px;
     border-radius: 50%;
-    border: none; cursor: pointer;
-    background: #1e3a5f; color: #fff;
-    font-size: 19px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    cursor: pointer;
+    background: linear-gradient(135deg, #243b5e 0%, #1a2a44 100%);
+    color: #eaf2ff;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-    transition: transform 0.25s ease, background 0.25s ease;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
 }
-#vfd-theme-toggle:hover { transform: scale(1.1) rotate(15deg); }
-html.vfd-dark #vfd-theme-toggle { background: #f5c542; color: #1e2a44; }
+#vfd-theme-toggle svg { width: 22px; height: 22px; }
+#vfd-theme-toggle:hover { transform: scale(1.1) rotate(12deg); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4); }
+html.vfd-dark #vfd-theme-toggle {
+    background: linear-gradient(135deg, #ffd96b 0%, #f5b942 100%);
+    color: #3a2c05;
+    border-color: rgba(0, 0, 0, 0.12);
+}
 
 /* ---------- Responsivo ---------- */
+
+/* MÓVIL: hamburguesa + toggle de tema juntos arriba-derecha, título debajo */
+@media (max-width: 991.98px) {
+    .navbar-custom .container { flex-wrap: wrap; row-gap: 6px; }
+    /* Hamburguesa a la derecha, dejando hueco para el toggle (ambos arriba-derecha) */
+    .navbar-custom .navbar-toggler { order: 1; margin-left: auto; margin-right: 56px; }
+    .navbar-custom .navbar-brand {
+        order: 2;
+        width: 100%;
+        margin-right: 0;
+        margin-top: 4px;
+    }
+    .navbar-custom .navbar-collapse { order: 3; width: 100%; }
+
+    /* Toggle claro/oscuro pegado al borde derecho, separado de la hamburguesa */
+    #vfd-theme-toggle {
+        top: 11px;
+        right: 14px;
+        width: 40px;
+        height: 40px;
+        font-size: 17px;
+        z-index: 1080; /* por encima de la navbar sticky */
+    }
+}
+
 @media (max-width: 576px) {
     #vfd-chatbot-container { bottom: 14px; right: 14px; }
     .vfd-chatbot-window {

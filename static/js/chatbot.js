@@ -46,11 +46,33 @@ class VFDChatBot {
         btn.id = 'vfd-theme-toggle';
         btn.type = 'button';
         btn.title = 'Cambiar tema claro/oscuro de la página';
-        btn.textContent = document.documentElement.classList.contains('vfd-dark') ? '☀️' : '🌙';
+
+        // Íconos de líneas finas (elegantes y nítidos)
+        const sunIcon = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4.2"></circle>
+                <line x1="12" y1="2.5" x2="12" y2="5"></line>
+                <line x1="12" y1="19" x2="12" y2="21.5"></line>
+                <line x1="2.5" y1="12" x2="5" y2="12"></line>
+                <line x1="19" y1="12" x2="21.5" y2="12"></line>
+                <line x1="5.1" y1="5.1" x2="6.9" y2="6.9"></line>
+                <line x1="17.1" y1="17.1" x2="18.9" y2="18.9"></line>
+                <line x1="5.1" y1="18.9" x2="6.9" y2="17.1"></line>
+                <line x1="17.1" y1="6.9" x2="18.9" y2="5.1"></line>
+            </svg>`;
+        const moonIcon = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+            </svg>`;
+
+        // En oscuro mostramos el sol (para volver a claro); en claro, la luna.
+        const setIcon = (dark) => { btn.innerHTML = dark ? sunIcon : moonIcon; };
+        setIcon(document.documentElement.classList.contains('vfd-dark'));
+
         btn.addEventListener('click', () => {
             const dark = document.documentElement.classList.toggle('vfd-dark');
             localStorage.setItem('vfdTheme', dark ? 'dark' : 'light');
-            btn.textContent = dark ? '☀️' : '🌙';
+            setIcon(dark);
         });
         document.body.appendChild(btn);
     }
@@ -178,7 +200,7 @@ class VFDChatBot {
     startDrag(e) {
         if (e.target.closest('button')) return;
         const win = document.getElementById('vfdChatWindow');
-        if (this.isMaximized) return;
+        // Movible también cuando está maximizado
         this.isDragging = true;
         const r = win.getBoundingClientRect();
         this.dragOffset.x = e.clientX - r.left;
