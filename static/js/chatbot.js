@@ -99,8 +99,8 @@ class VFDChatBot {
                             </svg>
                         </div>
                         <div class="vfd-header-title">
-                            <h6>Asistente Técnico VFD</h6>
-                            <small>En línea</small>
+                            <h6>Robin</h6>
+                            <small>Asistente Técnico VFD · En línea</small>
                         </div>
                     </div>
                     <div class="vfd-header-controls">
@@ -231,7 +231,7 @@ class VFDChatBot {
             'Estoy aquí para ayudarte con tus dudas técnicas de VFD.',
             'Consúltame sobre programación del CFW500 o sistemas de presión.'
         ];
-        return `${saludo} 👋 Soy tu Asistente Técnico VFD. ${frases[Math.floor(Math.random() * frases.length)]}`;
+        return `${saludo} 👋 Soy Robin, tu Asistente Técnico VFD. ${frases[Math.floor(Math.random() * frases.length)]}`;
     }
 
     addMessage(text, sender, save = true) {

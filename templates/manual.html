@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Manual de Usuario - WEG CFW500{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="text-center mb-4">
+        <h1 class="fw-bold"><i class="bi bi-journal-text me-2"></i>Manual de Usuario</h1>
+        <p class="text-muted mb-1">WEG CFW500 · Convertidor de Frecuencia</p>
+        <small class="text-muted">{{ paginas|length }} páginas de {{ total }} · Robin, tu Asistente Técnico VFD, también responde tus preguntas basándose en este manual.</small>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="input-group input-group-lg">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" id="manualSearch" class="form-control"
+                       placeholder="Buscar en el manual (ej: P0202, falla F0072, control PID, presión constante)...">
+                <button class="btn btn-outline-secondary" type="button" id="manualClear" title="Limpiar">✕</button>
+            </div>
+            <div id="manualCount" class="form-text mt-2"></div>
+        </div>
+    </div>
+
+    {% if paginas %}
+    <div id="manualPages">
+        {% for p in paginas %}
+        <div class="manual-page card mb-3" data-page="{{ p.n }}">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-file-earmark-text me-1"></i>Página {{ p.n }}
+            </div>
+            <div class="card-body p-2 text-center">
+                <img class="manual-img img-fluid"
+                     src="{{ url_for('static', filename='manual_img/page_%03d.png'|format(p.n)) }}"
+                     alt="Manual CFW500 - página {{ p.n }}"
+                     loading="lazy"
+                     style="max-width:900px; width:100%; border:1px solid #e3e3e3; border-radius:4px;">
+                <div class="manual-text" hidden>{{ p.text }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <p id="manualNoResults" class="text-center text-muted py-4" style="display:none;">
+        No se encontraron páginas con ese término. Prueba con un código (P0202) o una palabra clave.
+    </p>
+    {% else %}
+    <div class="alert alert-warning">
+        El manual aún no está disponible. Ejecuta <code>python build_manual.py</code> para generar el contenido.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    const input = document.getElementById('manualSearch');
+    const clearBtn = document.getElementById('manualClear');
+    const countEl = document.getElementById('manualCount');
+    const noResults = document.getElementById('manualNoResults');
+    const pages = Array.from(document.querySelectorAll('.manual-page'));
+
+    // Texto normalizado (sin acentos, minúsculas) cacheado por página
+    const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    pages.forEach(p => { p._txt = norm(p.querySelector('.manual-text').textContent); });
+
+    let timer = null;
+    function run() {
+        const q = norm(input.value.trim());
+        if (!q) {
+            pages.forEach(p => { p.style.display = ''; });
+            countEl.textContent = '';
+            if (noResults) noResults.style.display = 'none';
+            return;
+        }
+        const terms = q.split(/\s+/).filter(Boolean);
+        let visible = 0;
+        pages.forEach(p => {
+            const match = terms.every(t => p._txt.includes(t));
+            p.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+        countEl.textContent = visible + ' página(s) encontrada(s)';
+        if (noResults) noResults.style.display = visible ? 'none' : 'block';
+    }
+
+    input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 180); });
+    clearBtn.addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+})();
+</script>
+{% endblock %}

@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import config
 from openai import OpenAI
+from manual_search import cargar_manual, contexto_para_prompt
 
 app = Flask(__name__)
 app.config.from_object(config[os.environ.get('FLASK_ENV', 'development')])
@@ -33,6 +34,9 @@ class User(db.Model):
 
 with app.app_context():
     db.create_all()
+
+# Cargar el Manual de Usuario en memoria al arrancar (para el bot y la página)
+cargar_manual()
 
 # Contenido específico de cada módulo
 temas = [
@@ -257,6 +261,15 @@ def modulo(modulo_id):
                          modulo_siguiente=modulo_siguiente,
                          progreso=progreso)
 
+@app.route('/manual')
+def manual():
+    """Página 'Manual de Usuario' del WEG CFW500 (contenido del PDF)."""
+    data = cargar_manual()
+    return render_template('manual.html',
+                           titulo=data['title'],
+                           paginas=data['pages'],
+                           total=data.get('total_pages', len(data['pages'])))
+
 @app.route('/dashboard')
 def course_dashboard():
     if 'user_id' not in session:
@@ -269,7 +282,7 @@ def course_dashboard():
 # Cliente OpenAI se inicializará en la función chatbot cuando se necesite
 client = None
 
-SYSTEM_PROMPT = """Eres un asistente técnico experto en electricidad, electrónica, física, matemática y especialmente en Variadores de Frecuencia (VFD), arrancadores suave, bombas y bombeo con paneles solares.
+SYSTEM_PROMPT = """Eres Robin, un asistente técnico experto en electricidad, electrónica, física, matemática y especialmente en Variadores de Frecuencia (VFD), arrancadores suave, bombas y bombeo con paneles solares. Si te preguntan tu nombre, eres Robin.
 
 TEMAS PERMITIDOS:
 - Variadores de Frecuencia (VFD) - CFW500, WEG, funcionamiento, programación
@@ -295,6 +308,20 @@ ESTILO:
 - Técnico pero accesible
 - Máximo 3-4 párrafos por respuesta
 - Incluye fórmulas cuando sea necesario
+
+MANUAL DE USUARIO (MUY IMPORTANTE):
+- Tienes acceso al Manual de Usuario del WEG CFW500. Cuando la pregunta esté
+  relacionada, recibirás fragmentos del manual; cada uno empieza con su ubicación,
+  por ejemplo: [Página 96 del visor (ref. manual 8-1)].
+- Responde SIEMPRE basándote en esos fragmentos. NO inventes valores, códigos ni páginas.
+- Cuando te pregunten por un parámetro, comando o función, usa EXACTAMENTE este formato:
+  • Parámetro/Comando: <código y nombre, ej. P0202 – Tipo de Control>
+  • Función: <qué hace; incluye opciones/rango y ajuste de fábrica si aparecen>
+  • Página: <número de Página del visor> (y la ref. del manual si está, ej. 8-1)
+- La "Página del visor" es la que el alumno puede abrir en la sección "Manual de
+  Usuario" del sitio; cítala siempre con ese número para que pueda ir directo a ella.
+- Sé conciso y certero. Si la información NO está en los fragmentos recibidos, dilo
+  claramente ("No lo encuentro en el manual") y nunca inventes la página.
 """
 
 @app.route('/api/chatbot', methods=['POST'])
@@ -317,15 +344,26 @@ def chatbot():
         except Exception as e:
             return jsonify({'error': f'Error al inicializar OpenAI: {str(e)}'}), 500
         
-        # Llamar a OpenAI API
+        # Buscar en el Manual de Usuario los fragmentos relevantes a la pregunta
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        contexto = contexto_para_prompt(user_message, k=6)
+        if contexto:
+            messages.append({
+                "role": "system",
+                "content": (
+                    "Fragmentos del Manual de Usuario del WEG CFW500 relevantes a la "
+                    "pregunta del alumno. Úsalos como fuente principal y cita la página:\n\n"
+                    + contexto
+                )
+            })
+        messages.append({"role": "user", "content": user_message})
+
+        # Llamar a OpenAI API (gpt-4o-mini: más preciso siguiendo el manual)
         response = openai_client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_message}
-            ],
-            max_tokens=500,
-            temperature=0.7
+            model="gpt-4o-mini",
+            messages=messages,
+            max_tokens=700,
+            temperature=0.2
         )
         
         bot_message = response.choices[0].message.content
