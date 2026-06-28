@@ -9,11 +9,15 @@
             <div class="module-content">
                 <span class="badge bg-primary mb-3 px-3 py-2">Módulo {{ modulo.id }}</span>
                 <h2 class="fw-bold mb-4" style="color: var(--primary-dark);">{{ modulo.titulo }}</h2>
-                <img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=1000&q=80" class="img-fluid rounded mb-4 w-100" alt="{{ modulo.titulo }}" style="max-height: 400px; object-fit: cover;">
+                <img src="{{ modulo.imagen }}" class="img-fluid rounded mb-4 w-100" alt="{{ modulo.titulo }}" style="object-fit: contain;">
                 
                 <h4 class="fw-bold mt-4 mb-3" style="color: var(--primary-blue);"> Descripción del Módulo:</h4>
                 <p class="lead">{{ modulo.descripcion }}</p>
-                
+
+                {% for img in modulo.imagenes_descripcion or [] %}
+                    <img src="{{ img }}" class="img-fluid rounded mb-4 w-100" alt="{{ modulo.titulo }}" style="object-fit: contain;">
+                {% endfor %}
+
                 <h4 class="fw-bold mt-4 mb-3" style="color: var(--primary-blue);">🎯 Objetivos de esta lección:</h4>
                 <ul class="list-unstyled">
                     {% for obj in modulo.objetivos %}

@@ -49,7 +49,10 @@ temas = [
             "Identificar las partes principales de un VFD",
             "Entender la diferencia entre VFD y arranque directo"
         ],
-        "imagen": "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800&q=80"
+        "imagen": "/static/diapositivas/diapositiva_01.png",
+        "imagenes_descripcion": [
+            "/static/diapositivas/diapositiva_16.png"
+        ]
     },
     {
         "id": 2,
@@ -260,6 +263,12 @@ def modulo(modulo_id):
                          modulo_anterior=modulo_anterior,
                          modulo_siguiente=modulo_siguiente,
                          progreso=progreso)
+
+@app.route('/taller')
+def taller():
+    """Landing 'Taller VDF': presentación completa del taller (35 diapositivas)."""
+    total_diapositivas = 35
+    return render_template('taller.html', total_diapositivas=total_diapositivas)
 
 @app.route('/manual')
 def manual():

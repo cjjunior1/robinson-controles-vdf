@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Taller VDF - Robinson Controles VDF{% endblock %}
+
+{% block content %}
+<style>
+    .taller-hero {
+        background: linear-gradient(135deg, #0d1b2a 0%, #1e3a5f 100%);
+        color: #fff;
+        padding: 3rem 0 2rem;
+    }
+    .taller-hero .badge-taller {
+        background: #e63946;
+        letter-spacing: 1px;
+    }
+    .slide-stage {
+        background: #000;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(0,0,0,.35);
+    }
+    .slide-stage .carousel-item img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        object-fit: contain;
+        background: #000;
+    }
+    .slide-counter {
+        font-weight: 700;
+        color: #1e3a5f;
+    }
+    .taller-thumb {
+        cursor: pointer;
+        border: 3px solid transparent;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+        background: #000;
+        position: relative;
+    }
+    .taller-thumb img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        display: block;
+    }
+    .taller-thumb:hover {
+        transform: translateY(-4px);
+        border-color: #e63946;
+        box-shadow: 0 10px 22px rgba(0,0,0,.18);
+    }
+    .taller-thumb .thumb-num {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        background: rgba(30,58,95,.9);
+        color: #fff;
+        font-size: .72rem;
+        font-weight: 700;
+        padding: 1px 7px;
+        border-radius: 20px;
+    }
+    .carousel-control-prev-icon, .carousel-control-next-icon {
+        background-color: rgba(0,0,0,.55);
+        border-radius: 50%;
+        padding: 18px;
+        background-size: 50%;
+    }
+</style>
+
+<section class="taller-hero text-center">
+    <div class="container">
+        <span class="badge badge-taller mb-3 px-3 py-2">TALLER PRESENCIAL · 5 HORAS</span>
+        <h1 class="display-4 fw-bold mb-3">Taller de Programación de<br>Variadores de Velocidad</h1>
+        <p class="lead mb-4">Presentación completa del taller — {{ total_diapositivas }} diapositivas con teoría, programación del WEG CFW500 y aplicaciones reales.</p>
+        <a href="/register" class="btn btn-lg btn-comenzar px-5 py-3 fw-bold">Inscríbete al Taller <i class="bi bi-arrow-right ms-2"></i></a>
+    </div>
+</section>
+
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="slide-stage mb-3">
+            <div id="tallerCarousel" class="carousel slide" data-bs-ride="false">
+                <div class="carousel-inner">
+                    {% for i in range(1, total_diapositivas + 1) %}
+                    <div class="carousel-item {% if i == 1 %}active{% endif %}">
+                        <img src="{{ url_for('static', filename='taller/Diapositiva' ~ i ~ '.jpg') }}"
+                             alt="Diapositiva {{ i }} del Taller VDF" loading="lazy">
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#tallerCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#tallerCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+        </div>
+        <div class="text-center">
+            <span class="slide-counter">Diapositiva <span id="slideActual">1</span> de {{ total_diapositivas }}</span>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold" style="color:#1e3a5f;">Todas las diapositivas</h2>
+            <p class="text-muted">Haz clic en cualquier diapositiva para verla en grande.</p>
+        </div>
+        <div class="row g-3">
+            {% for i in range(1, total_diapositivas + 1) %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="taller-thumb" data-bs-target="#tallerCarousel" data-bs-slide-to="{{ i - 1 }}"
+                     onclick="document.getElementById('tallerCarousel').scrollIntoView({behavior:'smooth'});">
+                    <span class="thumb-num">{{ i }}</span>
+                    <img src="{{ url_for('static', filename='taller/Diapositiva' ~ i ~ '.jpg') }}"
+                         alt="Diapositiva {{ i }}" loading="lazy">
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        var carousel = document.getElementById('tallerCarousel');
+        var contador = document.getElementById('slideActual');
+        if (carousel && contador) {
+            carousel.addEventListener('slid.bs.carousel', function (e) {
+                contador.textContent = (e.to + 1);
+            });
+        }
+    })();
+</script>
+{% endblock %}
